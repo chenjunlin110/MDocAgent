@@ -1,0 +1,8 @@
+[
+  "qwen.qwen3-vl-235b-a22b-instruct",
+  "google.gemma-3-4b-it",
+  "google.gemma-3-12b-it",
+  "google.gemma-3-27b-it",
+  "minimax.minimax-m2",
+  "zai.glm-4.6"
+]

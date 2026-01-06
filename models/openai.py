@@ -1,17 +1,27 @@
 from models.base_model import BaseModel
 from openai import OpenAI
 import base64
+from PIL import Image
+from io import BytesIO
 
-def encode_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode("utf-8")
+def encode_image(image_path, max_size=1024, jpeg_quality=70):
+    # Downscale and compress to reduce request size for base64 payloads.
+    image = Image.open(image_path)
+    image = image.convert("RGB")
+    image.thumbnail((max_size, max_size))
+    buffer = BytesIO()
+    image.save(buffer, format="JPEG", quality=jpeg_quality, optimize=True)
+    return base64.b64encode(buffer.getvalue()).decode("utf-8")
 
 class MyOpenAI(BaseModel):
     def __init__(self, config):
         super().__init__(config)
         self.model = self.config.model
+        base_url = getattr(self.config, "base_url", "") or ""
+        base_url = base_url or None
         self.client = OpenAI(
             api_key=self.config.api_key,
+            base_url=base_url,
         )
         self.create_ask_message = lambda question: {
             "role": "user",

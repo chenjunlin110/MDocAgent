@@ -1,4 +1,13 @@
-import torch
+try:
+    import torch
+except ModuleNotFoundError:
+    class _TorchStub:
+        class cuda:
+            @staticmethod
+            def empty_cache():
+                return None
+
+    torch = _TorchStub()
 class BaseModel():
     def __init__(self, config):
         """

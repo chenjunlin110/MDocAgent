@@ -86,4 +86,3 @@ class MultiAgentSystem:
         for agent in self.agents:
             agent.clean_messages()
         self.sum_agent.clean_messages()
-

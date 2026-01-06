@@ -4,5 +4,6 @@ defaults:
 
 model: gpt-4o
 api_key: 
+base_url:
 module_name: models.openai
 class_name: MyOpenAI

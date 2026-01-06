@@ -1,18 +1,35 @@
+from __future__ import annotations
+
 import json
 import re
 from dataclasses import dataclass
-from PIL import Image
+from typing import Any
 import os
-import pymupdf
 from tqdm import tqdm
 from datetime import datetime
 import glob
 
 @dataclass
 class Content:
-    image: Image
+    image: Any
     image_path: str
     txt: str
+
+
+def _require_pil():
+    try:
+        from PIL import Image
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError("Pillow is required for image loading.") from exc
+    return Image
+
+
+def _require_pymupdf():
+    try:
+        import pymupdf
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError("PyMuPDF is required for PDF extraction.") from exc
+    return pymupdf
     
 class BaseDataset():
     def __init__(self, config):
@@ -80,6 +97,8 @@ class BaseDataset():
         if self.config.use_mix:
             if self.config.r_mix_key in sample:
                 for page in sample[self.config.r_mix_key][:self.config.top_k]:
+                    if page < 0 or page >= len(content_list):
+                        continue
                     if page in sample[self.config.r_image_key]:
                         origin_image_path = ""
                         origin_image_path = content_list[page].image_path
@@ -89,9 +108,13 @@ class BaseDataset():
         else:
             if self.config.r_text_key in sample:
                 for page in sample[self.config.r_text_key][:self.config.top_k]:
+                    if page < 0 or page >= len(content_list):
+                        continue
                     texts.append(content_list[page].txt.replace("\n", ""))
             if self.config.r_image_key in sample:
                 for page in sample[self.config.r_image_key][:self.config.top_k]:
+                    if page < 0 or page >= len(content_list):
+                        continue
                     origin_image_path = ""
                     origin_image_path = content_list[page].image_path
                     images.append(origin_image_path)
@@ -115,6 +138,8 @@ class BaseDataset():
         else:
             sample_no_list = [i for i in range(0,min(len(content_list),self.config.vlm_max_page))]
         for page in sample_no_list:
+            if page < 0 or page >= len(content_list):
+                continue
             texts.append(content_list[page].txt.replace("\n", ""))
             origin_image_path = ""
             origin_image_path = content_list[page].image_path
@@ -138,6 +163,7 @@ class BaseDataset():
         return content_list
     
     def load_image(self, file):
+        Image = _require_pil()
         pil_im = Image.open(file)
         return pil_im
 
@@ -159,6 +185,7 @@ class BaseDataset():
         image_list = list()
         text_list = list()
         doc_name = self.EXTRACT_DOCUMENT_ID(sample)
+        pymupdf = _require_pymupdf()
         with pymupdf.open(os.path.join(self.config.document_path, sample["doc_id"])) as pdf:
             for index, page in enumerate(pdf[:max_pages]):
                 # save page as an image

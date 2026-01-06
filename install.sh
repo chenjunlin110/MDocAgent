@@ -4,6 +4,7 @@ pip install accelerate
 pip install qwen_vl_utils argparse matplotlib pymupdf ipywidgets
 pip install pandas seaborn openai scikit-learn
 pip install hydra-core
+pip install "langchain<0.2"
 
 # Colpali
 pip install colpali_engine==0.1.1
