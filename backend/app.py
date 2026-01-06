@@ -15,7 +15,8 @@ from pydantic import BaseModel, Field
 from hydra import compose, initialize_config_dir
 
 ROOT = Path(__file__).resolve().parents[1]
-MDOC_PATH = ROOT / "MDocAgent"
+# Repo root already contains config/; avoid assuming nested MDocAgent folder.
+MDOC_PATH = ROOT
 CONFIG_DIR = MDOC_PATH / "config"
 UPLOAD_DIR = ROOT / "data" / "uploads"
 UPLOAD_DATA_DIR = ROOT / "data" / "upload-datasets"
